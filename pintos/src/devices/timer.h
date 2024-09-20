@@ -13,6 +13,14 @@ void timer_calibrate (void);
 int64_t timer_ticks (void);
 int64_t timer_elapsed (int64_t);
 
+//! LAB1 S
+struct st_list {
+    uint64_t ticks_awake_at;
+    struct thread* t;
+    struct st_list* next_st;
+};
+//! LAB1 E
+
 /* Sleep and yield the CPU to other threads. */
 void timer_sleep (int64_t ticks);
 void timer_msleep (int64_t milliseconds);
