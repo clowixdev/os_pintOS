@@ -8,7 +8,7 @@ All the labs and reports that will be completed during this course will be locat
 
 ## Installing PintOS (using **Ubuntu 16.04 x64**)
 
-*You can check step-by-step giude in Russian [here](./pintos_install.pdf).*
+*You can check step-by-step guide in Russian [here](./pintos_install.pdf).*
 
 **1. Gathering all needed packages with command:**
 
@@ -65,7 +65,7 @@ In order to fix it, you need to re-type `$^V` sequence in `/usr/bin/pintos` file
 
 ## Launching tests in PintOS
 
-*You can check step-by-step giude in Russian [here](./pintos_testing.pdf).*
+*You can check step-by-step guide in Russian [here](./pintos_testing.pdf).*
 
 To launch any test in PintOS, you need to compile its kernel by using `make` command. Enter `pintos_directory/src/threads` and compile kernel here by using:
 
@@ -74,7 +74,7 @@ user@host:~$ cd pintos/src/threads
 user@host:~$ /pintos/src/threads$ make
 ```
 
-Then, you can launch any tests and get results with this syntax, where you change **\<LABDIR>** and **\<TESTID>** to what you need:
+Then, you can launch any tests and get results with this syntax, where you change **\<LABDIR>** and **\<TESTDIR>** to what you need:
 
 ```console
 user@host:~$ cd pintos_location/src/threads/build
@@ -90,6 +90,18 @@ fail /tests/<LABDIR>/<TESTDIR>.o
 ...
 ```
 
+## Prepare all the code to be tested on IBKS
+
+*You can check step-by-step guide in Russian [here](./pintos_guide.pdf) in III block.*
+
+After you have done coding and passing all the needed tests, you have to pack source code correctly to load it on IBKS. To do that, execute that command:
+
+```console
+user@host:~$ cd pintos/src && make clean && cd ../../ && tar –zcf pintos_lab<LABNUMBER>.tar.gz pintos
+```
+
+Change the **\<LABNUMBER>** to the needed one and you are ready to go, load the output archive to the site and check how much test you've passed.
+
 ### Have fun exploring how operating systems works using this small OS
 
 &emsp;
@@ -97,6 +109,28 @@ fail /tests/<LABDIR>/<TESTDIR>.o
 ## LABs
 
 ### *Lab 1: (System timer)*
+
+#### In this Laboratory work the task was to modify system timer to optimize active waiting
+
+Modifications were added to `timer.c` and `timer.h` files in `src/devices/` folder. You can check all the work that have been done in `lab1/pintos_lab1.tar.gz` archive in this repository. Report is also in `lab1` folder.
+
+The main idea was to create a dynamic-queue that sorts elements on adding and to turn on active waiting for the element that is more likely to be woken up earlier.
+
+Using `Ubuntu Desktop 16.04 LTS` as a virtual machine to launch PintOS on, files were sent to VM using `scp`. After that, kernel was recompiled and first test was executed to test the correctness of code (is it even compiling?) with this cmd sequence:
+
+```console
+user@host:~$ mv ~/shared/timer.c ~/shared/timer.h ~/shared/pintos/src/devices/ && make clean && make && pintos --qemu -- -q run alarm-single
+```
+
+After that, it is needed to check is current code is working correct. For that, all the needed tests are executed with:
+
+```console
+user@host:~/pintos/src/threads/build$ rm tests/threads/*.result && (make tests/threads/alarm-zero.result && make tests/threads/alarm-negative.result && make tests/threads/alarm-single.result && make tests/threads/alarm-simultaneous.result && make tests/threads/alarm-multiple.result) | grep -E "pass | fail"
+```
+
+After that, all the tests were passed on the IBKS, and the lab was done!
+
+>STATUS: making report
 
 ### *Lab 2: coming soon*
 
