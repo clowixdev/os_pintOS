@@ -19,8 +19,9 @@ user@host:~$ sudo apt-get install gcc-multilib make perl qemu
 &emsp;&emsp;you can use:
 
 - `qemu-system` instead of `qemu` if qemu is not found.
-- `gcc-5.4` instead of `gcc-multilib` if any problem appears with it.
 - `gcc` instead of `gcc-multilib` if you have `x86` system.
+
+You also need to install `GCC` version `5.4` or lower for PintOS to work properly.
 
 **2. Creating a link to ease emulation process:**
 
