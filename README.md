@@ -8,6 +8,14 @@ All the labs and reports that will be completed during this course will be locat
 
 ## Installing PintOS (using **Ubuntu 16.04 x64**)
 
+---
+
+### *ATTENTION!*
+
+#### I strongly recommend you to use Ubuntu `16.04` as VM to install PintOS on, because all the needed version of software will be installed automatically, and PintOS will launch without any bugs
+
+---
+
 *You can check step-by-step guide in Russian [here](./pintos_install.pdf).*
 
 **1. Gathering all needed packages with command:**
@@ -21,15 +29,13 @@ user@host:~$ sudo apt-get install gcc-multilib make perl qemu
 - `qemu-system` instead of `qemu` if qemu is not found.
 - `gcc` instead of `gcc-multilib` if you have `x86` system.
 
-You also need to install `GCC` version `5.4` or lower for PintOS to work properly.
-
 **2. Creating a link to ease emulation process:**
 
 ```console
 user@host:~$ ln /usr/bin/qemu-system-x86_64 /usr/bin/qemu
 ```
 
-&emsp;&emsp;If you have any problems with this step, check the location where `qemu-system` is installed and edit command using your installation location. P.S. for `x86` use `qemu-system-x86`
+If you have any problems with this step, check the location where `qemu-system` is installed and edit command using your installation location. P.S. for `x86` use `qemu-system-x86`
 
 **3. Unpacking PintOS source files:**
 
@@ -37,7 +43,7 @@ user@host:~$ ln /usr/bin/qemu-system-x86_64 /usr/bin/qemu
 user@host:~$ tar –zxf pintos.tar.gz
 ```
 
-&emsp;&emsp;Extract all the source files where it will be handy for you to edit them
+Extract all the source files where it will be handy for you to edit them
 
 **4. Preparing scripts to compile and run PintOS:**
 
@@ -48,9 +54,11 @@ user@host:~/pintos/src/utils$ sudo chmod 755 /usr/bin/backtrace /usr/bin/pintos 
 user@host:~/pintos/src/utils$ sudo chmod 644 /usr/bin/Pintos.pm /usr/bin/gdb-macros
 ```
 
-&emsp;&emsp;By doing this, you moving all the files to system `/usr/bin` folder and granting them rights to be read and executed
+By doing this, you moving all the files to system `/usr/bin` folder and granting them rights to be read and executed
 
-**x. Fixing known issues:**
+## Fixing known issues
+
+**1. Encoding bug:**
 
 When you've done all the steps above, you can meet one known bug that is caused by encoding:
 
@@ -59,6 +67,24 @@ Unrecognized character \x16; marked by <-- HERE after   if ($<-- HERE near colum
 ```
 
 In order to fix it, you need to re-type `$^V` sequence in `/usr/bin/pintos` file exactly in `911` string `if ($^V ge 5.8.0) { ... }`. After doing this everything should work fine.
+
+**2. Infinity loading QEMU bug:**
+
+This bug should look like QEMU is infinitely relaunching without changing it's output like this:
+
+```console
+...
+Loading.............
+Kernel command line: -q run alarm-single
+Pintos booting with PiLo hda1
+Loading.............
+Kernel command line: -q run alarm-single
+Pintos booting with PiLo hda1
+Loading.............
+...
+```
+
+This bug is caused by wrong version of GCC and GDB. The 100% supported version is `5.4.x` and as I said in the beginning, everything will work fine if you use `16.04 Ubuntu`, because all the needed version will be installed automatically. Because you don't use correct version, therefore this bug is appearing. In order to fix it, you should install `GCC/GDB v5.4.x`. Good luck with that!
 
 ### Congrats! On this step, everything is ready to work with PintOS
 
