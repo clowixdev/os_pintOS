@@ -94,7 +94,7 @@ This bug is caused by wrong version of GCC and GDB. The 100% supported version i
 
 *You can check step-by-step guide in Russian [here](./pintos_testing.pdf).*
 
-To launch any test in PintOS, you need to compile its kernel by using `make` command. Enter `pintos_directory/src/threads` and compile kernel here by using:
+To launch any test in PintOS, you need to compile its kernel by using `make` command. Enter `pintos/src/threads` and compile kernel here by using:
 
 ```console
 user@host:~$ cd pintos/src/threads
@@ -104,8 +104,8 @@ user@host:~$ /pintos/src/threads$ make
 Then, you can launch any tests and get results with this syntax, where you change **\<LABDIR>** and **\<TESTDIR>** to what you need:
 
 ```console
-user@host:~$ cd pintos_location/src/threads/build
-user@host:~/pintos_location/src/threads/build$ rm tests/<LABDIR>/*.result && (make tests/<LABDIR>/<TESTDIR>.result && make ... ) | grep -E "pass | fail"
+user@host:~$ cd pintos/src/threads/build
+user@host:~/pintos/src/threads/build$ rm tests/<LABDIR>/*.result && (make tests/<LABDIR>/<TESTDIR>.result && make ... ) | grep -E "pass | fail"
 ```
 
 After executing this command, you will see all the test results without any extra output:
