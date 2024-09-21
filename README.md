@@ -104,8 +104,8 @@ user@host:~$ /pintos/src/threads$ make
 Then, you can launch any tests and get results with this syntax, where you change **\<LABDIR>** and **\<TESTDIR>** to what you need:
 
 ```console
-user@host:~$ cd pintos_location/src/threads/build
-user@host:~/pintos_location/src/threads/build$ rm tests/<LABDIR>/*.result && (make tests/<LABDIR>/<TESTDIR>.result && make ... ) | grep -E "pass | fail"
+user@host:~$ cd pintos/src/threads/build
+user@host:~/pintos/src/threads/build$ rm tests/<LABDIR>/*.result && (make tests/<LABDIR>/<TESTDIR>.result && make ... ) | grep -E "pass | fail"
 ```
 
 After executing this command, you will see all the test results without any extra output:
