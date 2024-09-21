@@ -94,7 +94,7 @@ This bug is caused by wrong version of GCC and GDB. The 100% supported version i
 
 *You can check step-by-step guide in Russian [here](./pintos_testing.pdf).*
 
-To launch any test in PintOS, you need to compile its kernel by using `make` command. Enter `pintos_directory/src/threads` and compile kernel here by using:
+To launch any test in PintOS, you need to compile its kernel by using `make` command. Enter `pintos/src/threads` and compile kernel here by using:
 
 ```console
 user@host:~$ cd pintos/src/threads
