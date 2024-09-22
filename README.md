@@ -155,9 +155,9 @@ After that, it is needed to check is current code is working correct. For that, 
 user@host:~/pintos/src/threads/build$ rm tests/threads/*.result && (make tests/threads/alarm-zero.result && make tests/threads/alarm-negative.result && make tests/threads/alarm-single.result && make tests/threads/alarm-simultaneous.result && make tests/threads/alarm-multiple.result) | grep -E "pass | fail"
 ```
 
-After that, all the tests were passed on the IBKS, and the lab was done!
+After that, all the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab1/lab1os.pdf) report and [docx](./lab1/lab1os.docx) report for that laboratory work.
 
->STATUS: making report
+>STATUS: Reports done, waiting for acceptance
 
 ### *Lab 2: coming soon*
 
