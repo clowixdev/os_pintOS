@@ -84,6 +84,7 @@ timer_elapsed(int64_t then)
 
 //! LAB 1 S
 
+/*Global STL root pointer*/
 struct st_list* stl = NULL;
 
 /* Function that shows current state of an dynamic-queue */
