@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "list": "c",
+        "algorithm": "c",
+        "mutex": "c"
     }
 }
