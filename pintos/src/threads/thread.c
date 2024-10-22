@@ -501,9 +501,10 @@ alloc_frame (struct thread *t, size_t size)
 /* Compares priority of A and B given threads. Returns TRUE if 
     priority of A less then B priority. */
 bool
-compare_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
+compare_thread_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
 {
-  return (list_entry(a, struct thread, elem)->priority < list_entry(b, struct thread, elem)->priority);
+  return (list_entry(a, struct thread, elem)->priority < 
+          list_entry(b, struct thread, elem)->priority);
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -517,7 +518,7 @@ next_thread_to_run (void)
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    return list_entry (list_pop_max(&ready_list, &compare_priority), struct thread, elem);
+    return list_entry (list_pop_max(&ready_list, &compare_thread_priority), struct thread, elem);
 }
 //! LAB 2 E
 
