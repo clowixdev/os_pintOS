@@ -205,10 +205,13 @@ thread_create (const char *name, int priority,
   sf->ebp = 0;
 
   intr_set_level (old_level);
-
+  
+  //! LAB 2 S
   /* Add to run queue. */
   thread_unblock (t);
-
+  thread_yield();
+  //! LAB 2 E
+  
   return tid;
 }
 
@@ -339,12 +342,21 @@ thread_foreach (thread_action_func *func, void *aux)
     }
 }
 
+//! LAB 2 S
 /* Sets the current thread's priority to NEW_PRIORITY. */
 void
-thread_set_priority (int new_priority) 
+thread_set_priority (int new_priority)
 {
+  enum intr_level old_level;
+  ASSERT (!intr_context ());
+  old_level = intr_disable ();
+
   thread_current ()->priority = new_priority;
+  thread_yield();
+
+  intr_set_level (old_level);
 }
+//! LAB 2 E
 
 /* Returns the current thread's priority. */
 int
@@ -383,7 +395,7 @@ thread_get_recent_cpu (void)
   /* Not yet implemented. */
   return 0;
 }
-
+
 /* Idle thread.  Executes when no other thread is ready to run.
 
    The idle thread is initially put on the ready list by
@@ -432,7 +444,7 @@ kernel_thread (thread_func *function, void *aux)
   function (aux);       /* Execute the thread function. */
   thread_exit ();       /* If function() returns, kill the thread. */
 }
-
+
 /* Returns the running thread. */
 struct thread *
 running_thread (void) 
@@ -485,19 +497,29 @@ alloc_frame (struct thread *t, size_t size)
   return t->stack;
 }
 
+//! LAB 2 S
+/* Compares priority of A and B given threads. Returns TRUE if 
+    priority of A less then B priority. */
+bool
+compare_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
+{
+  return (list_entry(a, struct thread, elem)->priority < list_entry(b, struct thread, elem)->priority);
+}
+
 /* Chooses and returns the next thread to be scheduled.  Should
    return a thread from the run queue, unless the run queue is
    empty.  (If the running thread can continue running, then it
    will be in the run queue.)  If the run queue is empty, return
    idle_thread. */
 static struct thread *
-next_thread_to_run (void) 
+next_thread_to_run (void)
 {
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+    return list_entry (list_pop_max(&ready_list, &compare_priority), struct thread, elem);
 }
+//! LAB 2 E
 
 /* Completes a thread switch by activating the new thread's page
    tables, and, if the previous thread is dying, destroying it.
@@ -581,7 +603,7 @@ allocate_tid (void)
 
   return tid;
 }
-
+
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
