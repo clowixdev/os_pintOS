@@ -3,6 +3,9 @@
         "interrupt.h": "c",
         "list": "c",
         "algorithm": "c",
-        "mutex": "c"
+        "mutex": "c",
+        "list.h": "c",
+        "compare": "c",
+        "random": "c"
     }
 }
