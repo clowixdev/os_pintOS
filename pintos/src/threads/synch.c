@@ -101,6 +101,7 @@ sema_try_down (struct semaphore *sema)
   return success;
 }
 
+//! LAB 2 S
 /* Up or "V" operation on a semaphore.  Increments SEMA's value
    and wakes up one thread of those waiting for SEMA, if any.
 
@@ -114,11 +115,14 @@ sema_up (struct semaphore *sema)
 
   old_level = intr_disable ();
   if (!list_empty (&sema->waiters)) 
-    thread_unblock (list_entry (list_pop_front (&sema->waiters),
+    thread_unblock (list_entry (list_pop_max(&sema->waiters, &compare_thread_priority),
                                 struct thread, elem));
   sema->value++;
   intr_set_level (old_level);
+
+  thread_yield();
 }
+//! LAB 2 E
 
 static void sema_test_helper (void *sema_);
 
@@ -156,7 +160,7 @@ sema_test_helper (void *sema_)
       sema_up (&sema[1]);
     }
 }
-
+
 /* Initializes LOCK.  A lock can be held by at most a single
    thread at any given time.  Our locks are not "recursive", that
    is, it is an error for the thread currently holding a lock to
@@ -245,13 +249,16 @@ lock_held_by_current_thread (const struct lock *lock)
 
   return lock->holder == thread_current ();
 }
-
+
+//! LAB 2 S
 /* One semaphore in a list. */
 struct semaphore_elem 
   {
     struct list_elem elem;              /* List element. */
     struct semaphore semaphore;         /* This semaphore. */
+    int priority;                       /* This semaphore's element priority */
   };
+//! LAB 2 E
 
 /* Initializes condition variable COND.  A condition variable
    allows one piece of code to signal a condition and cooperating
@@ -264,6 +271,7 @@ cond_init (struct condition *cond)
   list_init (&cond->waiters);
 }
 
+//! LAB 2 S
 /* Atomically releases LOCK and waits for COND to be signaled by
    some other piece of code.  After COND is signaled, LOCK is
    reacquired before returning.  LOCK must be held before calling
@@ -293,12 +301,23 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
-  
+
+  waiter.priority = thread_current()->priority;
+
   sema_init (&waiter.semaphore, 0);
   list_push_back (&cond->waiters, &waiter.elem);
   lock_release (lock);
   sema_down (&waiter.semaphore);
   lock_acquire (lock);
+}
+
+/* Compares priority of A and B given semaphore elements. Returns TRUE if 
+    priority of A less then B priority. */
+bool
+compare_semaphore_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
+{
+  return (list_entry(a, struct semaphore_elem, elem)->priority < 
+          list_entry(b, struct semaphore_elem, elem)->priority);
 }
 
 /* If any threads are waiting on COND (protected by LOCK), then
@@ -317,9 +336,10 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (lock_held_by_current_thread (lock));
 
   if (!list_empty (&cond->waiters)) 
-    sema_up (&list_entry (list_pop_front (&cond->waiters),
+    sema_up (&list_entry (list_pop_max(&cond->waiters, &compare_semaphore_priority),
                           struct semaphore_elem, elem)->semaphore);
 }
+//! LAB 2 E
 
 /* Wakes up all threads, if any, waiting on COND (protected by
    LOCK).  LOCK must be held before calling this function.
