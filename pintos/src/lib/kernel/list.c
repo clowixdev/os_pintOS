@@ -264,6 +264,18 @@ list_pop_front (struct list *list)
   return front;
 }
 
+//! LAB 2 S
+/* Removes the element with highest parameter decided by FUNC from LIST and returns it.
+    Undefined behavior if LIST is empty before removal.*/
+struct list_elem *
+list_pop_max(struct list *list, list_less_func *less)
+{
+  struct list_elem *highest_p = list_max(list, less, NULL);
+  list_remove(highest_p);
+  return highest_p;
+}
+//! LAB 2 E
+
 /* Removes the back element from LIST and returns it.
    Undefined behavior if LIST is empty before removal. */
 struct list_elem *
