@@ -116,11 +116,11 @@ sema_up (struct semaphore *sema)
   old_level = intr_disable ();
   if (!list_empty (&sema->waiters)) 
     thread_unblock (list_entry (list_pop_max(&sema->waiters, &compare_thread_priority),
-                                struct thread, elem));
+                                struct thread, elem));  //! change
   sema->value++;
   intr_set_level (old_level);
 
-  thread_yield();
+  thread_yield(); //! change
 }
 //! LAB 2 E
 
@@ -256,7 +256,7 @@ struct semaphore_elem
   {
     struct list_elem elem;              /* List element. */
     struct semaphore semaphore;         /* This semaphore. */
-    int priority;                       /* This semaphore's element priority */
+    int priority;                       /* This semaphore's element priority */ //! addition
   };
 //! LAB 2 E
 
@@ -302,7 +302,7 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
 
-  waiter.priority = thread_current()->priority;
+  waiter.priority = thread_current()->priority; //! addition
 
   sema_init (&waiter.semaphore, 0);
   list_push_back (&cond->waiters, &waiter.elem);
@@ -317,7 +317,7 @@ bool
 compare_semaphore_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
 {
   return (list_entry(a, struct semaphore_elem, elem)->priority < 
-          list_entry(b, struct semaphore_elem, elem)->priority);
+          list_entry(b, struct semaphore_elem, elem)->priority); //! addition
 }
 
 /* If any threads are waiting on COND (protected by LOCK), then
@@ -337,7 +337,7 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
 
   if (!list_empty (&cond->waiters)) 
     sema_up (&list_entry (list_pop_max(&cond->waiters, &compare_semaphore_priority),
-                          struct semaphore_elem, elem)->semaphore);
+                          struct semaphore_elem, elem)->semaphore); //! change
 }
 //! LAB 2 E
 

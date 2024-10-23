@@ -270,9 +270,9 @@ list_pop_front (struct list *list)
 struct list_elem *
 list_pop_max(struct list *list, list_less_func *less)
 {
-  struct list_elem *highest_p = list_max(list, less, NULL);
+  struct list_elem *highest_p = list_max(list, less, NULL); 
   list_remove(highest_p);
-  return highest_p;
+  return highest_p; //! addition
 }
 //! LAB 2 E
 

@@ -209,7 +209,7 @@ thread_create (const char *name, int priority,
   //! LAB 2 S
   /* Add to run queue. */
   thread_unblock (t);
-  thread_yield();
+  thread_yield(); //! change
   //! LAB 2 E
   
   return tid;
@@ -504,7 +504,7 @@ bool
 compare_thread_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
 {
   return (list_entry(a, struct thread, elem)->priority < 
-          list_entry(b, struct thread, elem)->priority);
+          list_entry(b, struct thread, elem)->priority);  //! addition
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should
@@ -518,7 +518,7 @@ next_thread_to_run (void)
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    return list_entry (list_pop_max(&ready_list, &compare_thread_priority), struct thread, elem);
+    return list_entry (list_pop_max(&ready_list, &compare_thread_priority), struct thread, elem); //! change
 }
 //! LAB 2 E
 

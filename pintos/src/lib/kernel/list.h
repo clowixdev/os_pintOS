@@ -179,6 +179,6 @@ struct list_elem *list_max (struct list *, list_less_func *, void *aux);
 struct list_elem *list_min (struct list *, list_less_func *, void *aux);
 
 /* Pop exact element. */
-struct list_elem *list_pop_max (struct list *, list_less_func *);
+struct list_elem *list_pop_max (struct list *, list_less_func *);  //! addition
 
 #endif /* lib/kernel/list.h */
