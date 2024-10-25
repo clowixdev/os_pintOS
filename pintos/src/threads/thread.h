@@ -93,6 +93,12 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+//! LAB 2 S
+   int old_priority;                    /* Original priority of process. */
+   struct list_elem donors_elem;        /* List element for donators list. */
+   struct lock *lock_waiter;            /* Pointer to lock. */
+//! LAB 2 E
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
