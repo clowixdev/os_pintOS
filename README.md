@@ -152,14 +152,56 @@ user@host:~$ mv ~/shared/timer.c ~/shared/timer.h ~/shared/pintos/src/devices/ &
 After that, it is needed to check is current code is working correct. For that, all the needed tests are executed with:
 
 ```console
-user@host:~/pintos/src/threads/build$ rm tests/threads/*.result && (make tests/threads/alarm-zero.result && make tests/threads/alarm-negative.result && make tests/threads/alarm-single.result && make tests/threads/alarm-simultaneous.result && make tests/threads/alarm-multiple.result) | grep -E "pass | fail"
+user@host:~/pintos/src/threads/build$ rm tests/threads/*.result && (make tests/threads/alarm-zero.result && make tests/threads/alarm-negative.result && make tests/threads/alarm-single.result && make tests/threads/alarm-simultaneous.result && make tests/threads/alarm-multiple.result) | grep -E "pass|FAIL"
 ```
 
 After that, all the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab1/lab1os.pdf) report and [docx](./lab1/lab1os.docx) report for that laboratory work.
 
->STATUS: Reports done, waiting for acceptance
+>STATUS: Accepted!
 
-### *Lab 2: coming soon*
+### *Lab 2: (Scheduler)*
+
+#### In this Laboratory work the task was to modify system scheduler to consider thread priorities and add priority donation system
+
+A couple of system files were modified, here is list of modified files:
+
+- `thread.c`
+- `thread.h`
+- `synch.c`
+- `synch.h`
+
+Also, double-linked-list was updated with some methods and `list.h`, `list.c` files were also modified. You can check all the work that have been done in `lab2/pintos_lab2.tar.gz` archive in this repository. Report is also in `lab2` folder.
+
+The main idea was to force scheduler to choose process with the highest priority in "ready" queue and choose it as a next thread to run. In the second part of the lab, priority-donation-system was created. Thread can exchange their priorities in order not to block critical section.
+
+Files were sent to VM using `scp` and checked locally, if it is even compiling, with this cmd sequence:
+
+```console
+user@host:~$ cd ~/shared && mv synch.c synch.h thread.c thread.h pintos/src/threads && mv list.c list.h pintos/src/lib/kernel && cd pintos/src/threads/build && make clean && make
+```
+
+After that, all tests were checked with:
+
+```console
+user@host:~/pintos/src/threads/build$ rm tests/threads/*.result && 
+(make tests/threads/alarm-priority.result && 
+make tests/threads/priority-change.result &&
+make tests/threads/priority-fifo.result &&
+make tests/threads/priority-preempt.result &&
+make tests/threads/priority-sema.result &&
+make tests/threads/priority-condvar.result &&
+make tests/threads/priority-donate-one.result &&
+make tests/threads/priority-donate-lower.result &&
+make tests/threads/priority-donate-multiple.result &&
+make tests/threads/priority-donate-multiple2.result &&
+make tests/threads/priority-donate-sema.result &&
+make tests/threads/priority-donate-nest.result &&
+make tests/threads/priority-donate-chain.result) | grep -E "pass|FAIL"
+```
+
+All the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab2/lab2os.pdf) report and [docx](./lab2/lab2os.docx) report for that laboratory work. (*in process*)
+
+>STATUS: Creating report
 
 ### *Lab 3: coming soon*
 
