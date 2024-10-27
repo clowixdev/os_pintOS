@@ -95,6 +95,7 @@ struct thread
 
 //! LAB 2 S
    int old_priority;                    /* Original priority of process. */
+   struct list donors_list;             /* Contains priority donors. */
    struct list_elem donors_elem;        /* List element for donators list. */
    struct lock *lock_waiter;            /* Pointer to lock. */
 //! LAB 2 E

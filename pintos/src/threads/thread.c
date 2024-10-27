@@ -92,7 +92,6 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
-  list_init (&donors_list); //! addition
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -354,7 +353,7 @@ thread_set_priority (int new_priority)
   struct thread *curr = thread_current();
   bool need_to_yield = (curr->old_priority > new_priority) ? true : false;
 
-  if (list_empty(&donors_list)) {
+  if (list_empty(&curr->donors_list)) {
     curr->priority = curr->old_priority = new_priority;
   } else {
     curr->old_priority = new_priority;
@@ -491,8 +490,11 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->magic = THREAD_MAGIC;
   t->priority = priority;
-  t->old_priority = priority; //! addition
-  t->lock_waiter = NULL; //! addition
+  //!LAB 2 S
+  t->old_priority = priority;
+  t->lock_waiter = NULL;
+  list_init(&t->donors_list);
+  //!LAB 2 E
   list_push_back (&all_list, &t->allelem);
 }
 
@@ -515,7 +517,7 @@ alloc_frame (struct thread *t, size_t size)
 bool
 compare_thread_priority (struct list_elem *a, struct list_elem *b, void *aux UNUSED) 
 {
-  return (list_entry(a, struct thread, elem)->priority < 
+  return (list_entry(a, struct thread, elem)->priority <
           list_entry(b, struct thread, elem)->priority);  //! addition
 }
 
