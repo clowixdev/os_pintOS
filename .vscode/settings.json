@@ -6,6 +6,11 @@
         "mutex": "c",
         "list.h": "c",
         "compare": "c",
-        "random": "c"
+        "random": "c",
+        "thread.h": "c",
+        "synch.h": "c",
+        "functional": "c",
+        "cstdlib": "c",
+        "cstdint": "c"
     }
 }
