@@ -109,18 +109,22 @@ sema_try_down (struct semaphore *sema)
 void
 sema_up (struct semaphore *sema) 
 {
-  enum intr_level old_level;
-
   ASSERT (sema != NULL);
+  enum intr_level old_level = intr_disable ();
+  struct thread *next_thread = NULL;
 
-  old_level = intr_disable ();
-  if (!list_empty (&sema->waiters)) 
-    thread_unblock (list_entry (list_pop_max(&sema->waiters, &compare_thread_priority),
-                                struct thread, elem));  //! change
+  if (!list_empty (&sema->waiters)) {
+    next_thread = list_entry (list_pop_max(&sema->waiters, &compare_thread_priority),
+                                struct thread, elem);
+    thread_unblock (next_thread);  //! change
+  }
+
   sema->value++;
   intr_set_level (old_level);
 
-  thread_yield(); //! change
+  if (next_thread && next_thread->priority > thread_current()->priority) {
+    thread_yield(); //! change
+  }
 }
 //! LAB 2 E
 
@@ -185,6 +189,52 @@ lock_init (struct lock *lock)
   sema_init (&lock->semaphore, 1);
 }
 
+//! LAB 2 S
+/* Function checks, does RECEIVER needs more priority to continue
+   executing, donates priority and adds SENDER do donors_list if he donates priority 
+   and if APPEND flag is true*/
+void priority_donate(struct thread* sender, struct thread *receiver, bool append)
+{
+  if (receiver->priority < sender->priority) {
+    receiver->priority = sender->priority;
+  }
+
+  if (append) {
+    list_push_back(&receiver->donors_list, &sender->donors_elem);
+  }
+}
+
+/* Function checks if elem A has LOCK lock in lock_waiter field. */
+bool find_lock(struct list_elem *a, struct lock *lock) {
+  return list_entry(a, struct thread, donors_elem)->lock_waiter == lock;
+}
+
+/* Function changes the priority of RECEIVER back and 
+   delete all the LOCK locks in donators_list. After that,
+   balancing all the priorities in donors_list. */
+void revert_priority_donation(struct thread* receiver, struct lock *lock)
+{
+  receiver->priority = receiver->old_priority;
+  struct list_elem *result;
+  
+  do
+  {
+    result = list_pop_exact(&receiver->donors_list, &find_lock, lock);
+  } while (result != NULL);
+
+  struct list_elem *elem = list_begin(&receiver->donors_list);
+  struct thread *sender;
+
+  while (elem != list_end(&receiver->donors_list))
+  {
+    sender = list_entry(elem, struct thread, donors_elem);
+    if (sender->priority > receiver->priority)
+      receiver->priority = sender->priority;
+
+    elem = list_next(elem);
+  }
+}
+
 /* Acquires LOCK, sleeping until it becomes available if
    necessary.  The lock must not already be held by the current
    thread.
@@ -200,9 +250,27 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+  if (lock->holder != NULL) 
+  {
+    priority_donate(thread_current(), lock->holder, true);
+    thread_current()->lock_waiter = lock;
+
+    struct thread *curr = thread_current();
+    struct thread *holder = lock->holder;
+
+    while (holder->lock_waiter) 
+    {
+      curr = holder;
+      holder = holder->lock_waiter->holder;
+      priority_donate(curr, holder, false);
+    }
+  }
+
   sema_down (&lock->semaphore);
+  thread_current()->lock_waiter = NULL;
   lock->holder = thread_current ();
 }
+//! LAB 2 E
 
 /* Tries to acquires LOCK and returns true if successful or false
    on failure.  The lock must not already be held by the current
@@ -224,6 +292,7 @@ lock_try_acquire (struct lock *lock)
   return success;
 }
 
+//! LAB 2 S
 /* Releases LOCK, which must be owned by the current thread.
 
    An interrupt handler cannot acquire a lock, so it does not
@@ -235,9 +304,12 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+  revert_priority_donation(thread_current(), lock);
+
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 }
+//! LAB 2 E
 
 /* Returns true if the current thread holds LOCK, false
    otherwise.  (Note that testing whether some other thread holds

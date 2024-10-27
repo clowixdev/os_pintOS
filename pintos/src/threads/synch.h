@@ -31,6 +31,13 @@ bool lock_try_acquire (struct lock *);
 void lock_release (struct lock *);
 bool lock_held_by_current_thread (const struct lock *);
 
+/* Function that compares list_elem locks with given one */
+bool find_lock(struct list_elem *, struct lock *);
+
+/* Priority donation functions */
+void priority_donate(struct thread *, struct thread *, bool);
+void cancel_priority_donate(struct thread *, struct lock *);
+
 /* Condition variable. */
 struct condition 
   {
