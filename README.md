@@ -199,9 +199,9 @@ make tests/threads/priority-donate-nest.result &&
 make tests/threads/priority-donate-chain.result) | grep -E "pass|FAIL"
 ```
 
-All the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab2/lab2os.pdf) report and [docx](./lab2/lab2os.docx) report for that laboratory work. (*in process*)
+All the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab2/lab2os.pdf) report and [docx](./lab2/lab2os.docx) report for that laboratory work.
 
->STATUS: Creating report
+>STATUS: Finished report, waiting for an acceptance
 
 ### *Lab 3: coming soon*
 
