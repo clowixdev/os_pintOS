@@ -1,5 +1,16 @@
 {
     "files.associations": {
-        "interrupt.h": "c"
+        "interrupt.h": "c",
+        "list": "c",
+        "algorithm": "c",
+        "mutex": "c",
+        "list.h": "c",
+        "compare": "c",
+        "random": "c",
+        "thread.h": "c",
+        "synch.h": "c",
+        "functional": "c",
+        "cstdlib": "c",
+        "cstdint": "c"
     }
 }

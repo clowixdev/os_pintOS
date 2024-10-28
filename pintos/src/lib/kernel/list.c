@@ -264,6 +264,48 @@ list_pop_front (struct list *list)
   return front;
 }
 
+//! LAB 2 S
+/* Removes the element with highest parameter decided by FUNC from LIST and returns it.
+    Undefined behavior if LIST is empty before removal.*/
+struct list_elem *
+list_pop_max(struct list *list, list_less_func *less)
+{
+  struct list_elem *highest_p = list_max(list, less, NULL); 
+  list_remove(highest_p);
+  return highest_p; //! addition
+}
+
+/* Returns the element in LIST which fits to FUNC's condition with 
+   given auxiliary data AUX. If there is more than one element, 
+   returns the one that appears earlier in the list. If
+   the list is empty, returns NULL. */
+struct list_elem *
+list_exact (struct list *list, list_exact_func *func, void *aux)
+{
+  struct list_elem *elem;
+  for (elem = list_begin (list) ; elem != list_end(list); elem = list_next(elem))
+  {
+    if (func (elem, aux))
+      return elem;
+  }
+
+  return NULL; //! addition
+}
+
+/* Finds the element that fits the condition in given FUNC in LIST and pops
+  it. Also, returning popped element.*/
+struct list_elem *
+list_pop_exact(struct list *list, list_exact_func *func, void* aux)
+{
+  struct list_elem *exact_element = list_exact(list, func, aux);
+  if (exact_element != NULL)
+  {
+    list_remove(exact_element);
+  }
+  return exact_element; //! addition
+}
+//! LAB 2 E
+
 /* Removes the back element from LIST and returns it.
    Undefined behavior if LIST is empty before removal. */
 struct list_elem *
