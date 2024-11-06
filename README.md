@@ -201,9 +201,37 @@ make tests/threads/priority-donate-chain.result) | grep -E "pass|FAIL"
 
 All the tests were passed on the IBKS, and the lab was done! You can find [pdf](./lab2/lab2os.pdf) report and [docx](./lab2/lab2os.docx) report for that laboratory work.
 
->STATUS: Finished report, waiting for an acceptance
+>STATUS: Accepted!
 
-### *Lab 3: coming soon*
+### *Lab 3: (Narrow Bridge)*
+
+#### In this Laboratory work the task was to create a solution for a "Narrow bridge" task
+
+Only one system file was modified, because of restrictions:
+
+- `narrow-bridge.c`
+
+You can check all the work that have been done in `lab3/pintos_lab3.tar.gz` archive in this repository. Report is also in `lab3` folder. *(soon)*
+
+The main idea was to create system of semaphores that will prevent cars from breaking bridge and each other.
+
+**The rules for the bridge:**
+
+- Not more then 2 cars at the same time at the bridge.
+- Only one direction of movement at the same time.
+- Emergency cars must go before others.
+
+File was sent to VM using `scp` and checked locally, if it is even compiling and multiple tests were checked with this-like command:
+
+```console
+user@host:~/pintos/src/threads/build$ pintos --qemu -- -q run "narrow-bridge 1 2 3 4"
+```
+
+Numbers after "narrow-bridge" means, how much cars will be waiting. In this exact test, there will be 1 normal && 2 emergency on the left, and 3 normal && 4 emergency on the right
+
+All the tests must be checked manually, and the lab was done! You can find [pdf](./lab3/lab3os.pdf) report and [docx](./lab3/lab3os.docx) report for that laboratory work.
+
+>STATUS: Creating report
 
 ### *Lab 4: coming soon*
 
