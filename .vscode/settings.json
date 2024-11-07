@@ -11,6 +11,9 @@
         "synch.h": "c",
         "functional": "c",
         "cstdlib": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "narrow-bridge.h": "c",
+        "string": "c",
+        "format": "c"
     }
 }
