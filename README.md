@@ -211,7 +211,7 @@ Only one system file was modified, because of restrictions:
 
 - `narrow-bridge.c`
 
-You can check all the work that have been done in `lab3/pintos_lab3.tar.gz` archive in this repository. Report is also in `lab3` folder. *(soon)*
+You can check all the work that have been done in `lab3/pintos_lab3.tar.gz` archive in this repository. Report is also in `lab3` folder.
 
 The main idea was to create system of semaphores that will prevent cars from breaking bridge and each other.
 
@@ -231,7 +231,7 @@ Numbers after "narrow-bridge" means, how much cars will be waiting. In this exac
 
 All the tests must be checked manually, and the lab was done! You can find [pdf](./lab3/lab3os.pdf) report and [docx](./lab3/lab3os.docx) report for that laboratory work.
 
->STATUS: Creating report
+>STATUS: Waiting for an acceptance
 
 ### *Lab 4: coming soon*
 
