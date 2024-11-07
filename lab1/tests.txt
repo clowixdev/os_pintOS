@@ -1,3 +1,0 @@
-rm tests/threads/*.result && (make tests/threads/alarm-zero.result && make tests/threads/alarm-negative.result && make tests/threads/alarm-single.result && make tests/threads/alarm-simultaneous.result && make tests/threads/alarm-multiple.result) | grep -E "pass | fail"
-
-mv ~/shared/timer.c ~/shared/timer.h ~/shared/pintos/src/devices/ && make clean && make && pintos --qemu -- -q run alarm-single
