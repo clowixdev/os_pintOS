@@ -21,6 +21,172 @@
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
 
+//! LAB 4 S
+/* User's process list. Structure that contains TID's of processes 
+  Invoked by user. If node is empty, TID in node's value is -1. */
+struct user_pl {
+  bool is_root;
+  tid_t tid;
+  struct user_pl * next;
+} *UPL_root;
+
+/* Semaphore for kernel. It will make kernel wait process till his end. */
+struct semaphore * wk_sema; 
+
+/* Function that allocates memory for UPL node and init it 
+  with default values or given one. */
+struct user_pl * init_UPL(bool is_root, tid_t tid) {
+  struct user_pl *UPL = (struct user_pl*)malloc(sizeof(struct user_pl));
+
+  if (is_root) {
+    UPL->is_root = true;
+  } else {
+    UPL->is_root = false;
+  }
+
+  UPL->tid = tid;
+  UPL->next = NULL;
+
+  return UPL;
+}
+
+/* Recursive function that will add ELEM to UPL. */
+void add_to_UPL(struct user_pl *UPL, tid_t elem) {
+  if (UPL->tid == -1) {
+    UPL->tid = elem;
+  } else if (UPL->next == NULL) {
+    UPL->next = init_UPL(false, elem);
+  } else {
+    add_to_UPL(UPL->next, elem);
+  }
+}
+
+/* Removes element from UPL. If the element is in ROOT node, 
+  this node won't be deleted, it's value will be set to -1. */
+void remove_from_UPL(struct user_pl *UPL, int elem) {
+  if (UPL->tid == elem && UPL->is_root) {
+    UPL->tid = -1;
+    return;
+  } else if (UPL->next != NULL && UPL->next->tid == elem) {
+    if (UPL->next->next != NULL) {
+      struct user_pl *temp = UPL->next;
+      UPL->next = UPL->next->next;
+      free(temp);
+      return;
+    } else {
+      free(UPL->next);
+      UPL->next = NULL;
+      return;
+    }
+  } else if (UPL->next != NULL) {
+    remove_from_UPL(UPL->next, elem);
+  } else {
+    return;
+  }
+}
+
+/* Function that will check, if elem in UPL. */
+bool in_UPL(struct user_pl *UPL, tid_t elem) {
+  if (UPL->tid == elem) {
+    return true;
+  } else if (UPL->next == NULL) {
+    return false;
+  }
+
+  if (UPL->next != NULL) {
+    in_UPL(UPL->next, elem);
+  }
+}
+
+void show_UPL(struct user_pl *UPL) {
+  printf("{%d,%d} -> ", UPL->tid, UPL->is_root);
+
+  if (UPL->next != NULL) {
+    show_UPL(UPL->next);
+  }
+}
+
+/* Function will allocate enough space for string copy and copy it*/
+char * copy_string(const char *str) {
+  char *result;
+  size_t str_len = strlen(str) + 1;
+
+  result = (char *)malloc(sizeof(char) * str_len);
+  strlcpy(result, str, str_len);
+
+  return result;
+}
+
+/* Function that computes argc value and returns it. */
+int count_args(const char *str) {
+  char *arg_p = (char *)malloc(sizeof(char) * (strlen(str) + 1));
+  char *filename_copy = copy_string(str);
+
+  int argc = 0;
+
+  while ((arg_p = (char *)strtok_r(filename_copy, " ", &filename_copy))) {
+    if (arg_p != NULL) {
+      argc++;
+    }
+  }
+
+  return argc;
+}
+
+
+/* Function that will FILE_NAME string and add all arguments to stack, 
+  move ESP as it adds arguments to stack. */
+void parse_args_to_stack(void **esp, const char *file_name) {
+
+  char *arg_p = (char *)malloc(sizeof(char) * (strlen(file_name) + 1));
+  int argc = count_args(file_name);
+  char **argv = (char **)calloc(argc + 1, sizeof(char*));
+  uint32_t *argv_p = (uint32_t*)calloc(argc + 1, sizeof(uint32_t));
+  char *filename_copy = copy_string(file_name);
+
+  int idx = 0;
+  while ((arg_p = strtok_r(filename_copy, " ", &filename_copy))) {
+    if (arg_p != NULL) {
+      argv[idx] = arg_p;
+      idx++;
+    }
+  }
+
+  for (int arg_idx = argc - 1; arg_idx >= 0; arg_idx--) {
+    size_t arg_len = sizeof(char) * strlen(argv[arg_idx]) + 1;
+
+    *esp -= arg_len;
+    memcpy(*esp, argv[arg_idx], arg_len);
+    argv_p[arg_idx] = (uint32_t)*esp;
+  }
+
+  uint32_t align = (uint32_t) *esp % 4;
+  *esp -= align;
+  memcpy(*esp, &argv[argc], align);
+
+  for (int arg_idx = argc; arg_idx >= 0; arg_idx--) {
+    *esp -= sizeof(uint32_t);
+    memcpy(*esp, &argv_p[arg_idx], sizeof(uint32_t*));
+  }
+
+  uint32_t argv_ptr = *esp;
+  *esp -= sizeof(uint32_t);
+  memcpy(*esp, &argv_ptr, sizeof(uint32_t**));
+
+  *esp -= (sizeof(int));
+  memcpy(*esp, &argc, sizeof(int));
+
+  *esp -= (sizeof(void*));
+  memcpy(*esp, &argv[argc], sizeof(void*));
+
+  free(argv);
+  free(argv_p);
+  free(arg_p);
+
+  return;
+}
+//! LAB 4 E
+
 /* Starts a new thread running a user program loaded from
    FILENAME.  The new thread may be scheduled (and may even exit)
    before process_execute() returns.  Returns the new process's
@@ -30,18 +196,37 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
+  //! LAB 4 S
+  char *filename_copy = copy_string(file_name);
+  char *clear_filename = strtok_r(filename_copy, " ", &filename_copy);
+
+  if (UPL_root == NULL) {
+    UPL_root = init_UPL(true, -1);
+  }
+  //! LAB 4 E
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page (0);
   if (fn_copy == NULL)
     return TID_ERROR;
+  //! LAB 4 S
   strlcpy (fn_copy, file_name, PGSIZE);
+  //! LAB 4 E
 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  //! LAB 4 S
+  tid = thread_create (clear_filename, PRI_DEFAULT, start_process, fn_copy);
+  //! LAB 4 E
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+    palloc_free_page (fn_copy);
+
+  //! LAB 4 S
+  if (tid != TID_ERROR) {
+    add_to_UPL(UPL_root, tid);
+  }
+  //! LAB 4 E
+
   return tid;
 }
 
@@ -85,11 +270,23 @@ start_process (void *file_name_)
 
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
+//! LAB 4 S
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
-  return -1;
+  if (wk_sema == NULL) {
+    sema_init(&wk_sema, 0);
+  }
+
+  if (child_tid != TID_ERROR) {
+    sema_down(&wk_sema);
+
+    return thread_current()->exit_code;
+  } else {
+    return -1;
+  }
 }
+//! LAB 4 E
 
 /* Free the current process's resources. */
 void
@@ -97,6 +294,11 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
+
+  bool is_in_UPL = in_UPL(UPL_root, cur->tid);
+  if (is_in_UPL) {
+    remove_from_UPL(UPL_root, cur->tid);
+  }
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -114,6 +316,13 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
     }
+  //! LAB 4 S
+  if (is_in_UPL) {
+    printf("%s: exit(%d)\n", cur->name, cur->exit_code);
+
+    sema_up(&wk_sema);
+  }
+  //! LAB 4 E
 }
 
 /* Sets up the CPU for running user code in the current
@@ -131,7 +340,7 @@ process_activate (void)
      interrupts. */
   tss_update ();
 }
-
+
 /* We load ELF binaries.  The following definitions are taken
    from the ELF specification, [ELF1], more-or-less verbatim.  */
 
@@ -221,13 +430,18 @@ load (const char *file_name, void (**eip) (void), void **esp)
     goto done;
   process_activate ();
 
+  //! LAB 4 S
+  char *filename_copy = copy_string(file_name);
+  char *clear_filename = strtok_r(filename_copy, " ", &filename_copy);
+
   /* Open executable file. */
-  file = filesys_open (file_name);
+  file = filesys_open (clear_filename);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", file_name);
-      goto done; 
+      printf ("load: %s: open failed\n", clear_filename);
+      goto done;
     }
+  //! LAB 4 E
 
   /* Read and verify executable header. */
   if (file_read (file, &ehdr, sizeof ehdr) != sizeof ehdr
@@ -238,7 +452,9 @@ load (const char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", file_name);
+      //! LAB 4 S
+      printf ("load: %s: error loading executable\n", clear_filename);
+      //! LAB 4 E
       goto done; 
     }
 
@@ -302,13 +518,24 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))
+  if (!setup_stack (esp)) {
     goto done;
+  }
 
   /* Start address. */
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
+
+  // *esp -= 12;
+
+  //! LAB 4 S
+  if (success) {
+    parse_args_to_stack(esp, file_name);
+  } else {
+    printf("error occurred in load");
+  }
+  //! LAB 4 E
 
  done:
   /* We arrive here whether the load is successful or not. */

@@ -90,6 +90,10 @@ struct thread
     int priority;                       /* Priority. */
     struct list_elem allelem;           /* List element for all threads list. */
 
+//! LAB 4 S
+    int exit_code;                      /* Variable that contains exit code of process. */
+//! LAB 4 E
+
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 

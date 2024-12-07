@@ -494,7 +494,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->old_priority = priority;
   t->lock_waiter = NULL;
   list_init(&t->donors_list);
-  //!LAB 2 E
+  //!LAB 2 E -> LAB 4 S
+  t->exit_code = 0;
+  //!LAB 4 E
   list_push_back (&all_list, &t->allelem);
 }
 
