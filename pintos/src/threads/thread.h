@@ -93,6 +93,7 @@ struct thread
 //! LAB 4 S
     int exit_code;                      /* Variable that contains exit code of process. */
 //! LAB 4 E
+    int child_exit_code;                /* Variable that contains exit code of child process. */
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -104,9 +105,15 @@ struct thread
    struct lock *lock_waiter;            /* Pointer to lock. */
 //! LAB 2 E
 
+//! LAB 5 S
+   tid_t parent_tid;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
-    uint32_t *pagedir;                  /* Page directory. */
+   struct list thread_fd;
+   int fd;
+//! LAB 5 E
+   uint32_t *pagedir;                  /* Page directory. */
 #endif
 
     /* Owned by thread.c. */
@@ -149,5 +156,10 @@ int thread_get_nice (void);
 void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
+
+//! LAB 5 S
+struct thread * find_child(tid_t);
+int is_curr_child(tid_t);
+//! LAB 5 E
 
 #endif /* threads/thread.h */

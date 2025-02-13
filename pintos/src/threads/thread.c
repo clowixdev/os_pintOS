@@ -204,6 +204,8 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
+  t->exit_code = 0;
+
   intr_set_level (old_level);
   
   //! LAB 2 S
@@ -490,13 +492,17 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->magic = THREAD_MAGIC;
   t->priority = priority;
-  //!LAB 2 S
+  //! LAB 2 S
   t->old_priority = priority;
   t->lock_waiter = NULL;
   list_init(&t->donors_list);
-  //!LAB 2 E -> LAB 4 S
+  //! LAB 2 E -> LAB 4 S
   t->exit_code = 0;
-  //!LAB 4 E
+  t->child_exit_code = 0;
+  //! LAB 4 E -> LAB 5 S
+  t->fd = 2;
+  list_init(&t->thread_fd);
+  //! LAB 5 E
   list_push_back (&all_list, &t->allelem);
 }
 
@@ -534,7 +540,12 @@ next_thread_to_run (void)
   if (list_empty (&ready_list))
     return idle_thread;
   else
-    return list_entry (list_pop_max(&ready_list, &compare_thread_priority), struct thread, elem); //! change
+    return list_entry (list_pop_front (&ready_list), struct thread, elem);
+
+  // if (list_empty (&ready_list))
+  //   return idle_thread;
+  // else
+  //   return list_entry (list_pop_max(&ready_list, &compare_thread_priority), struct thread, elem); //! change
 }
 //! LAB 2 E
 
@@ -624,3 +635,27 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+//! LAB 5 S
+int compare_tid(struct list_elem *f_elem, tid_t tid) {
+  return (list_entry(f_elem, struct thread, allelem)->tid == tid) ? true : false;
+}
+
+struct thread * find_thread(tid_t tid) {
+  struct list_elem * elem = list_begin(&all_list);
+
+  if (compare_tid(elem, tid)) {
+    return list_entry(elem, struct thread, allelem);
+  } else if (elem->next == NULL) {
+    return NULL;
+  } else {
+    elem = list_exact(&all_list, &compare_tid, tid);
+  }
+
+  if (elem == NULL) {
+    return NULL;
+  }
+
+  return list_entry(elem, struct thread, allelem);
+}
+//! LAB 5 E

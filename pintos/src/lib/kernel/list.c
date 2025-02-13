@@ -270,7 +270,7 @@ list_pop_front (struct list *list)
 struct list_elem *
 list_pop_max(struct list *list, list_less_func *less)
 {
-  struct list_elem *highest_p = list_max(list, less, NULL); 
+  struct list_elem *highest_p = list_max(list, less, NULL);
   list_remove(highest_p);
   return highest_p; //! addition
 }
@@ -281,12 +281,14 @@ list_pop_max(struct list *list, list_less_func *less)
    the list is empty, returns NULL. */
 struct list_elem *
 list_exact (struct list *list, list_exact_func *func, void *aux)
-{
-  struct list_elem *elem;
-  for (elem = list_begin (list) ; elem != list_end(list); elem = list_next(elem))
-  {
-    if (func (elem, aux))
-      return elem;
+{ 
+  if (!list_empty(list)) {
+    struct list_elem *elem = list_begin(list);
+    for (; elem != list_end(list); elem = list_next(elem))
+    {
+      if (func (elem, aux))
+        return elem;
+    }
   }
 
   return NULL; //! addition

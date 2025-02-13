@@ -9,6 +9,13 @@ void process_exit (void);
 void process_activate (void);
 
 //! LAB 4 S
+/* UPL definition */
+struct user_pl {
+  bool is_root;
+  tid_t tid;
+  struct user_pl * next;
+};
+
 /* UPL utility */
 struct user_pl * init_UPL(bool, tid_t);
 void add_to_UPL(struct user_pl *, tid_t);

@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.cu": "c",
         "interrupt.h": "c",
         "list": "c",
         "algorithm": "c",
@@ -14,6 +15,31 @@
         "cstdint": "c",
         "narrow-bridge.h": "c",
         "string": "c",
-        "format": "c"
+        "format": "c",
+        "process.h": "c",
+        "atomic": "c",
+        "filesys.h": "c",
+        "off_t.h": "c",
+        "system_error": "c",
+        "istream": "c",
+        "pagedir.h": "c",
+        "vaddr.h": "c",
+        "palloc.h": "c",
+        "condition_variable": "c",
+        "chrono": "c",
+        "text_encoding": "c",
+        "typeinfo": "c",
+        "array": "c",
+        "deque": "c",
+        "forward_list": "c",
+        "unordered_map": "c",
+        "unordered_set": "c",
+        "vector": "c",
+        "iterator": "c",
+        "string_view": "c",
+        "span": "c",
+        "directory.h": "c",
+        "syscall.h": "c",
+        "file.h": "c"
     }
 }

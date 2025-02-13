@@ -1,0 +1,12 @@
+cd pintos/src/examples
+make
+cd ../userprog
+make
+cd build
+pintos-mkdir fs.dsk --filesys-size=2
+pintos --qemu --disk=fs.dsk \
+-p ../../examples/shell –a shell \
+-p ../../examples/rm –a rm \
+-p ../../examples/cat –a cat \
+-p ../../examples/cp –a cp \
+-p ../../examples/[myprog] –a [myprog] -- -f -q run shell

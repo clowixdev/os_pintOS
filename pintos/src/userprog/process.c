@@ -7,6 +7,7 @@
 #include <string.h>
 #include "userprog/gdt.h"
 #include "userprog/pagedir.h"
+#include "userprog/process.h"
 #include "userprog/tss.h"
 #include "filesys/directory.h"
 #include "filesys/file.h"
@@ -17,6 +18,9 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/syscall.h"
+
+#define ERROR_CODE  -1
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -24,11 +28,7 @@ static bool load (const char *cmdline, void (**eip) (void), void **esp);
 //! LAB 4 S
 /* User's process list. Structure that contains TID's of processes 
   Invoked by user. If node is empty, TID in node's value is -1. */
-struct user_pl {
-  bool is_root;
-  tid_t tid;
-  struct user_pl * next;
-} *UPL_root;
+struct user_pl * UPL_root;
 
 /* Semaphore for kernel. It will make kernel wait process till his end. */
 struct semaphore * wk_sema; 
@@ -87,6 +87,10 @@ void remove_from_UPL(struct user_pl *UPL, int elem) {
 
 /* Function that will check, if elem in UPL. */
 bool in_UPL(struct user_pl *UPL, tid_t elem) {
+  if (UPL == NULL) {
+    return false;
+  }
+
   if (UPL->tid == elem) {
     return true;
   } else if (UPL->next == NULL) {
@@ -132,7 +136,6 @@ int count_args(const char *str) {
 
   return argc;
 }
-
 
 /* Function that will FILE_NAME string and add all arguments to stack, 
   move ESP as it adds arguments to stack. */
@@ -196,14 +199,16 @@ process_execute (const char *file_name)
 {
   char *fn_copy;
   tid_t tid;
-  //! LAB 4 S
+  //! LAB 4-5 S
   char *filename_copy = copy_string(file_name);
   char *clear_filename = strtok_r(filename_copy, " ", &filename_copy);
 
-  if (UPL_root == NULL) {
-    UPL_root = init_UPL(true, -1);
+  struct file *user_file = filesys_open(clear_filename);
+  if (user_file == NULL) {
+    return -1;
   }
-  //! LAB 4 E
+  file_close(user_file);
+  //! LAB 4-5 E
 
   /* Make a copy of FILE_NAME.
      Otherwise there's a race between the caller and load(). */
@@ -218,14 +223,32 @@ process_execute (const char *file_name)
   //! LAB 4 S
   tid = thread_create (clear_filename, PRI_DEFAULT, start_process, fn_copy);
   //! LAB 4 E
-  if (tid == TID_ERROR)
+  if (tid == TID_ERROR) {
     palloc_free_page (fn_copy);
-
-  //! LAB 4 S
-  if (tid != TID_ERROR) {
-    add_to_UPL(UPL_root, tid);
   }
-  //! LAB 4 E
+
+  lock_acquire(&filesys_lock);
+  cond_wait(&filesys_cond, &filesys_lock);
+  lock_release(&filesys_lock);
+
+  //! LAB 4-5 S
+  // if (UPL_root == NULL) {
+  //   UPL_root = init_UPL(true, -1);
+  // }
+  
+  // add_to_UPL(UPL_root, tid);
+
+  if (tid != TID_ERROR) {
+    struct thread * child = find_thread(tid);
+    if (child != NULL) {
+      child->parent_tid = thread_current()->tid;
+    } else {
+      return ERROR_CODE;
+    }
+  } else {
+    return ERROR_CODE;
+  }
+  //! LAB 4-5 E
 
   return tid;
 }
@@ -248,8 +271,16 @@ start_process (void *file_name_)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  if (!success) 
+
+  if (!success) {
+    thread_current()->exit_code = ERROR_CODE;
+    *file_name = NULL;
     thread_exit ();
+  }
+
+  lock_acquire(&filesys_lock);
+  cond_broadcast(&filesys_cond, &filesys_lock);
+  lock_release(&filesys_lock);
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -279,9 +310,14 @@ process_wait (tid_t child_tid)
   }
 
   if (child_tid != TID_ERROR) {
-    sema_down(&wk_sema);
+    struct thread * child = find_thread(child_tid);
 
-    return thread_current()->exit_code;
+    if (child == NULL) {
+      return -1;
+    }
+
+    sema_down(&wk_sema);
+    return thread_current()->child_exit_code;
   } else {
     return -1;
   }
@@ -294,11 +330,6 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
-
-  bool is_in_UPL = in_UPL(UPL_root, cur->tid);
-  if (is_in_UPL) {
-    remove_from_UPL(UPL_root, cur->tid);
-  }
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -317,14 +348,19 @@ process_exit (void)
       pagedir_destroy (pd);
     }
   //! LAB 4 S
-  if (is_in_UPL) {
-    printf("%s: exit(%d)\n", cur->name, cur->exit_code);
-
+  // bool is_in_UPL = in_UPL(UPL_root, cur->tid);
+  // if (is_in_UPL) {
+  //   remove_from_UPL(UPL_root, cur->tid);
+  // }
+  printf("%s: exit(%d)\n", cur->name, cur->exit_code);
+  //! LAB 4 E - 5 S
+  struct thread * parent = find_thread(cur->parent_tid);
+  if (parent != NULL) {
+    parent->child_exit_code = cur->exit_code;
     sema_up(&wk_sema);
   }
-  //! LAB 4 E
+  //! LAB 5 E
 }
-
 /* Sets up the CPU for running user code in the current
    thread.
    This function is called on every context switch. */
@@ -426,8 +462,10 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();
-  if (t->pagedir == NULL) 
+  if (t->pagedir == NULL) {
+    t->exit_code = ERROR_CODE;
     goto done;
+  }
   process_activate ();
 
   //! LAB 4 S
