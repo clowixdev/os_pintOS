@@ -1,12 +1,21 @@
-#ifndef __LIB_STDDEF_H
-#define __LIB_STDDEF_H
+Robustness of virtual memory subsystem:
+- Test robustness of page table support.
+2	pt-bad-addr
+3	pt-bad-read
+2	pt-write-code
+3	pt-write-code2
+4	pt-grow-bad
 
-#define NULL ((void *) 0)
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *) 0)->MEMBER)
+- Test robustness of "mmap" system call.
+1	mmap-bad-fd
+1	mmap-inherit
+1	mmap-null
+1	mmap-zero
 
-/* GCC predefines the types we need for ptrdiff_t and size_t,
-   so that we don't have to guess. */
-typedef __PTRDIFF_TYPE__ ptrdiff_t;
-typedef __SIZE_TYPE__ size_t;
+2	mmap-misalign
 
-#endif /* lib/stddef.h */
+2	mmap-over-code
+2	mmap-over-data
+2	mmap-over-stk
+2	mmap-overlap
+

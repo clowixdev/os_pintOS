@@ -1,12 +1,23 @@
-cd pintos/src/examples
+cd ~/shared
+cp directory.c filesys.c pintos/src/filesys/
+cp syscall.c process.c pintos/src/userprog/
+cp shell.c bgrun.c psinfo.c loops.c Makefile pintos/src/examples/
+cd ~/shared/pintos/src/examples
 make
 cd ../userprog
 make
 cd build
-pintos-mkdir fs.dsk --filesys-size=2
+cp ../../examples/cp ../../examples/shell ../../examples/rm ../../examples/cat ./
+rm fs.dsk
+pintos-mkdisk fs.dsk --filesys-size=2
+pintos --qemu --disk=fs.dsk -- -f -q 
 pintos --qemu --disk=fs.dsk \
--p ../../examples/shell –a shell \
--p ../../examples/rm –a rm \
--p ../../examples/cat –a cat \
--p ../../examples/cp –a cp \
--p ../../examples/[myprog] –a [myprog] -- -f -q run shell
+-p shell \
+-p rm \
+-p cat \
+-p cp -- -q
+pintos --qemu --disk=fs.dsk -- -q run shell
+
+sudo scp ./pintos_clean/src/filesys/directory.c ./pintos_clean/src/filesys/filesys.c ./pintos_clean/src/userprog/process.c ./pintos_clean/src/userprog/syscall.c ./pintos_clean/src/examples/shell.c ./pintos_clean/src/examples/bgrun.c ./pintos_clean/src/examples/psinfo.c ./pintos_clean/src/examples/loops.c ./pintos_clean/src/examples/Makefile clowixdev@192.168.122.34:/home/clowixdev/shared/
+
+cd ~/shared && cp directory.c filesys.c pintos/src/filesys/ && cp syscall.c process.c pintos/src/userprog/ && cp shell.c bgrun.c psinfo.c loops.c Makefile pintos/src/examples/ && cd ~/shared/pintos/src/examples && make && cd ../userprog && make && cd build && cp ../../examples/cp ../../examples/shell ../../examples/rm ../../examples/cat ./ && rm fs.dsk && pintos-mkdisk fs.dsk --filesys-size=2 && pintos --qemu --disk=fs.dsk -- -f -q && ls && pintos --qemu --disk=fs.dsk -p shell –a shell -p rm –a rm -p cat –a cat -p cp –a cp -- -q && pintos --qemu --disk=fs.dsk -- -q run shell

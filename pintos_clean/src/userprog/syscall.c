@@ -136,6 +136,8 @@ void handle_exit(int status) {
 int handle_exec(const char *cmd_line) {
   validate_user_pointer(cmd_line);
 
+  printf("NAME: %s\n", cmd_line);
+
   tid_t tid = process_execute(cmd_line);
 
   return tid;

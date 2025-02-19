@@ -25,7 +25,6 @@ mcat_SRC = mcat.c
 mcp_SRC = mcp.c
 mkdir_SRC = mkdir.c
 pwd_SRC = pwd.c
-shell_SRC = shell.c
 
 nodnok_SRC = nodnok.c
 rndgen_SRC = rndgen.c
@@ -46,11 +45,13 @@ translate_SRC = translate.c
 replace_SRC = replace.c
 digset_SRC = digset.c
 iplog_SRC = iplog.c
-loops_SRC = loops.c
-bgrun_SRC = bgrun.c
-psinfo_SRC = psinfo.c
 memstat_SRC = memstat.c
 fsinfo_SRC = fsinfo.c
+
+shell_SRC = shell.c
+bgrun_SRC = bgrun.c
+psinfo_SRC = psinfo.c
+loops_SRC = loops.c
 
 include $(SRCDIR)/Make.config
 include $(SRCDIR)/Makefile.userprog

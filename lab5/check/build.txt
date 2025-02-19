@@ -1,0 +1,1 @@
+cd ~/shared && mv thread.c thread.h pintos/src/threads && mv syscall.c syscall.h process.c process.h pintos/src/userprog/ && cd pintos/src/userprog && make clean && make && cd ./build

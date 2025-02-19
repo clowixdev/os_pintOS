@@ -97,15 +97,19 @@ lookup (const struct dir *dir, const char *name,
   
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
+ 
+  printf("FILENAME: %s\n", name);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e) 
-    if (e.in_use && !strcmp (name, e.name)) 
+    printf("STATUS (%d): %d - %s - %s\n", e.in_use && !strcmp (name, e.name), e.in_use, name, e.name);
+    if (e.in_use && !strcmp (name, e.name)) //! <----
       {
         if (ep != NULL)
           *ep = e;
         if (ofsp != NULL)
           *ofsp = ofs;
+        printf("returned true\n");
         return true;
       }
   return false;
@@ -124,10 +128,13 @@ dir_lookup (const struct dir *dir, const char *name,
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
-  if (lookup (dir, name, &e, NULL))
+  if (lookup (dir, name, &e, NULL)) {
     *inode = inode_open (e.inode_sector);
-  else
+    printf("lookup true: %d\n", inode);
+  } else {
+    printf("lookup false: %d\n", inode);
     *inode = NULL;
+  }
 
   return *inode != NULL;
 }

@@ -178,11 +178,15 @@ process_execute (const char *file_name)
     return TID_ERROR;
   strlcpy (fn_copy, file_name, PGSIZE);
 
+  printf("%s\n", clear_filename);
+
   struct file *user_file = filesys_open(clear_filename);
   if (user_file == NULL) {
     return -1;
   }
   file_close(user_file);
+
+  printf("%s\n", clear_filename);
 
   /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (clear_filename, PRI_DEFAULT, start_process, fn_copy);
@@ -193,10 +197,14 @@ process_execute (const char *file_name)
   lock_acquire(&lock);	
   cond_wait(&cond, &lock);
   lock_release(&lock);
+
+  printf("%s\n", clear_filename);
 	
   if(*fn_copy == ERROR_CODE) {
     return -1;
   }
+
+  printf("%s\n", clear_filename);
 
   return tid;
 }
